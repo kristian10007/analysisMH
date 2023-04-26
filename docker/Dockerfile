@@ -1,6 +1,6 @@
 FROM python:3.10
 
-RUN apt-get update && apt-get install -y fonts-liberation2 make zip
+RUN apt-get update && apt-get install -y fonts-liberation2 make zip pandoc texlive
 
 COPY requirements.txt /root/requirements.txt
 

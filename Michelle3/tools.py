@@ -79,3 +79,36 @@ def discretizeDaysWithinYear(items):
             return 2
 
     return np.array([discretize(x) for x in items]) 
+
+
+
+class MD:
+    def __init__(self, fileName):
+        self.file = open(fileName, "w")
+
+    def print(self, text=""):
+        print(text, file=self.file)
+        print(text)
+
+    def close(self):
+        self.file.close()
+
+
+    def heading(self, title, n=1):
+        self.print()
+        self.print(("#" * n) + f" {title}")
+
+
+    def image(self, url, title="graphic"):
+        self.print()
+        self.print(f"![{title}]({url})")
+        self.print()
+
+
+    def code(self, text):
+        self.print()
+        self.print("~~~~~~~")
+        self.print(text)
+        self.print()
+        self.print("~~~~~~~")
+        self.print()

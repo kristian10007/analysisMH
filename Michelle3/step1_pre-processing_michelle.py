@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from tools import *
+from revdict import *
+
 # In[ ]:
 
 
@@ -18,8 +21,6 @@ from matplotlib import pyplot as plt
 from scipy.spatial import distance
 from scipy.stats import entropy
 from config import *
-from tools import *
-from revdict import *
 
 
 # In[ ]:
@@ -34,6 +35,8 @@ InteractiveShell.ast_node_interactivity = "all"
 
 
 ensureDir("data")
+md = MD("data/step1.md")
+md.heading("Data preprocessing")
 
 
 # In[ ]:
@@ -41,18 +44,6 @@ ensureDir("data")
 
 filename='Tabelle_mit_Patientennummer_K.xlsx'
 data=pd.read_excel(filename)
-
-
-# In[ ]:
-
-
-len(np.array(data.columns))
-
-
-# In[ ]:
-
-
-list(data.columns)
 
 
 # In[ ]:
@@ -71,15 +62,16 @@ def set_pandas_display_options() -> None:
 
 set_pandas_display_options()
 
-print(data.dtypes)
+md.heading("Columns in EXCEL-file", 2)
+md.code(data.dtypes)
 
 
 # ## Remove not needed rows and columns
 
 # In[ ]:
 
-
-data.shape
+md.heading("Remove not needed rows and columns", 2)
+md.print(f"Shape before: {data.shape}")
 
 
 # In[ ]:
@@ -87,7 +79,7 @@ data.shape
 
 indicesToDrop = np.where(data["Patient in Tabelle einfügen (1=ja, 0=nein)"] != 1)
 data.drop(indicesToDrop[0], axis=0, inplace=True)
-data=data.drop(["Patient in Tabelle einfügen (1=ja, 0=nein)"],axis=1)
+data = data.drop(["Patient in Tabelle einfügen (1=ja, 0=nein)"],axis=1)
 
 
 # In[ ]:
@@ -99,17 +91,18 @@ data = data.drop(columns_to_remove, axis=1)
 # In[ ]:
 
 
-data.shape
+md.print(f"Shape after: {data.shape}")
 
 
 # In[ ]:
 
 
-print(data.dtypes)
+md.code(data.dtypes)
 
 
 # ## Cleanup data
 
+md.heading("Cleanup data", 2)
 # In[ ]:
 
 
@@ -391,7 +384,8 @@ dense_data = dense_data.dropna()
 # In[ ]:
 
 
-dense_data.shape
+md.print(f"Shape after: {data.shape}")
+md.code(data.dtypes)
 
 
 # In[ ]:
@@ -400,23 +394,26 @@ dense_data.shape
 data = data.loc[np.array(dense_data.index)]
 
 
-# In[ ]:
-
-
-data.shape
-
 
 # In[ ]:
 
 
+md.heading("Checking datatypes", 2)
+fine = True
 for x in data.dtypes.index:
     if str(data.dtypes[x]) not in ['float64', 'int64']:
-        print(f"{x}: {str(data.dtypes[x])}: " + str([y for y in set(data[x]) if str(type(y)) != "<class 'datetime.time'>"]))
-        print()
+        md.print(f"{x}: {str(data.dtypes[x])}: " + str([y for y in set(data[x]) if str(type(y)) != "<class 'datetime.time'>"]))
+        md.print()
+        fine = False
+
+if fine:
+    md.print("Everything is fine")
+
 
 
 # In[ ]:
 
+md.heading("Checking for missing values", 2)
 
 distance_matrix=[]
 np_dense_data = np.array(dense_data)
@@ -442,15 +439,16 @@ missing_value_list = [x for x in list(data.columns) if x not in dense_data_pool]
 # In[ ]:
 
 
-missing_value_list
+md.print(missing_value_list)
 
 
 # In[ ]:
 
 
+md.print()
 total_impute_master=[]
 for feature_name in missing_value_list:
-    print(f"{feature_name} ...")
+    print(f"* {feature_name} ...")
     missing_value_indices = data[data[feature_name].isnull()].index.tolist()
     feature_impute_master = []
     for index in missing_value_indices:
@@ -517,19 +515,15 @@ for f, values in zip(missing_value_list, total_impute):
 # In[ ]:
 
 
-data.shape
+md.print()
+md.print(f"Shape after: {data.shape}")
+md.code(data.dtypes)
 
 
 # In[ ]:
 
 
-len(data.columns)
-
-
-# In[ ]:
-
-
-len(cont_features+nom_features+ord_features)
+# len(cont_features+nom_features+ord_features)
 
 
 # In[ ]:
@@ -546,12 +540,13 @@ data[c_BMI_Spender] = bmi(c_Gewicht_Spender, c_Groesse_Spender)
 
 # In[ ]:
 
+md.heading("Cleanup low entrophy", 2)
 
 cat_feature_entropies=[]
 for feature in nom_features+ord_features:
-    x=entropy(data[feature].value_counts(), base=2)/(len(data[feature].value_counts().index)-1)
+    x = entropy(data[feature].value_counts(), base=2)/(len(data[feature].value_counts().index)-1)
     cat_feature_entropies.append(x)
-    print(feature+' '+str(x))
+    md.print(f"* {feature} {x}")
 cat_feature_entropies=np.array(cat_feature_entropies)
 
 
@@ -563,7 +558,7 @@ for feature in cont_features:
     standardardized=(data[feature]-data[feature].mean())/data[feature].std()
     x=abs(standardardized.max()-standardardized.min())
     cont_feature_spread.append(x)
-    print(feature+'  '+str(x))
+    md.print(f"* {feature} {x}")
 cont_feature_spread=np.array(cont_feature_spread)
 
 
@@ -597,19 +592,14 @@ for c in columns_to_save:
 # In[ ]:
 
 
-data.shape
+md.print(f"Shape after: {data.shape}")
+md.code(data.dtypes)
 
 
 # In[ ]:
 
 
-list(data.columns)
-
-
-# In[ ]:
-
-
-data.head(10)
+#md.code(data.head(10))
 
 
 # In[ ]:
@@ -623,17 +613,20 @@ data.to_csv(fileName_csv_preprocessed, index=True)
 
 all_labeled_columns = [c_Patientennummer] + cont_features + nom_features + ord_features
 
-print("Colums with unknown data type:")
+md.heading("Final check", 2)
+md.print("Colums with unknown data type:")
+md.print()
 for x in data.columns:
     if x not in all_labeled_columns:
-        print(f"'{x}'")
-print()
-print()
+        md.print(f"* '{x}'")
+md.print()
+md.print()
 
-print("Colums not in dataset:")
+md.print("Colums not in dataset:")
+md.print()
 for x in all_labeled_columns:
     if x not in data.columns:
-        print(f"'{x}'")
+        md.print(f"* '{x}'")
 
 
 # In[ ]:
@@ -641,3 +634,4 @@ for x in all_labeled_columns:
 
 saveAutoRevDict()
 
+md.close()

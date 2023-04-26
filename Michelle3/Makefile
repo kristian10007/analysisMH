@@ -2,18 +2,25 @@ PreprocessedData=data/preproceesed_data_Michelle.csv
 Indices=data/final_cluser_patient_id.npy
 Now=$(shell date '+%Y-%m-%d_%H-%M-%S')
 LIB=config.py tools.py revdict.py
+Report=data/report.pdf
 
 ALL: out/analysis_Michelle_$(Now).zip
 
 
-out/analysis_Michelle_%.zip: $(PreprocessedData) $(Indices) data/step1.ok data/step2.ok data/step3.ok data/step4.ok 
+out/analysis_Michelle_%.zip: $(PreprocessedData) $(Indices) $(Report)
 	test -d out || mkdir out
 	zip $@ data/* data/images/* data/images/*/* data/images/*/*/*
 
 
-$(PreprocessedData): data/step1.ok
+$(PreprocessedData): data/step1.md
 
 $(Indices): data/step3.ok
+
+data/%.pdf: data/%.md
+	pandoc -f markdown -t pdf --toc $< -o $@
+
+data/report.md: data/step1.md
+	cat data/step1.md > data/report.md
 
 
 report.sh:
@@ -24,7 +31,7 @@ report.sh:
 	chmod +x report.sh
 
 # Step 1
-data/step1.ok: report.sh Tabelle_mit_Patientennummer_K.xlsx step1*.py $(LIB)
+data/step1.md: report.sh Tabelle_mit_Patientennummer_K.xlsx step1*.py $(LIB)
 	./report.sh 'Preprocessing data'
 	rm -f $@ $(PreprocessedData) data/rev_dict.json
 	test -d data || mkdir data
