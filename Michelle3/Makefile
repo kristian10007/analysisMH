@@ -1,32 +1,58 @@
 PreprocessedData=data/preproceesed_data_Michelle.csv
 Indices=data/final_cluser_patient_id.npy
+Now=$(shell date '+%Y-%m-%d_%H-%M-%S')
+LIB=config.py tools.py revdict.py
 
-analysis.zip: $(PreprocessedData) temp/step2.ok $(Indices) temp/step4.ok 
-	zip analysis.zip data/* images/* images/*/* images/*/*/*
+ALL: out/analysis_Michelle_$(Now).zip
 
 
+out/analysis_Michelle_%.zip: $(PreprocessedData) $(Indices) data/step1.ok data/step2.ok data/step3.ok data/step4.ok 
+	test -d out || mkdir out
+	zip $@ data/* data/images/* data/images/*/* data/images/*/*/*
+
+
+$(PreprocessedData): data/step1.ok
+
+$(Indices): data/step3.ok
+
+
+report.sh:
+	echo '#/bin/bash' > $@
+	echo 'echo "=="' >> $@
+	echo 'echo "== $$1"' >> $@
+	echo 'echo "============================"' >> $@
+	chmod +x report.sh
 
 # Step 1
-$(PreprocessedData): Tabelle_mit_Patientennummer_K.xlsx
-	python3 step1_pre-processing_michelle.py
+data/step1.ok: report.sh Tabelle_mit_Patientennummer_K.xlsx step1*.py $(LIB)
+	./report.sh 'Preprocessing data'
+	rm -f $@ $(PreprocessedData) data/rev_dict.json
+	test -d data || mkdir data
+	python3 step1_*.py > data/step1.log 2>&1
+	touch $@
 
 
 # Step 2
-temp/step2.ok: $(PreprocessedData)
-	python3 step2_patient_Classification_michelle
-	test -d temp || mkdir temp
+data/step2.ok: $(PreprocessedData) step2*.py $(LIB)
+	./report.sh 'Classification'
+	rm -rf $@ data/images/Classification
+	python3 step2_*.py > data/step2.log 2>&1
 	touch $@
 
 
 # Step 3
-$(Indices): $(PreprocessedData)
-	python3 step3_patient_stratification_michelle.py
+data/step3.ok: $(PreprocessedData) step3*.py $(LIB)
+	./report.sh 'Stratification'
+	rm -rf $@ data/images/Stratification data/*.npy
+	python3 step3_*.py > data/step3.log 2>&1
+	touch data/step3.ok
 
 
 # Step 4
-temp/step4.ok: $(PreprocessedData) $(Indices)
-	python3 step4_patient_clusters_hypothesis_testing_michelle.py
-	test -d temp || mkdir temp
+data/step4.ok: $(PreprocessedData) $(Indices) step4*.py $(LIB)
+	./report.sh 'Hypothesis testing'
+	rm -rf $@ data/images/cluster_hypothesis_testing
+	python3 step4_*.py > data/step4.log 2>&1
 	touch $@
 
 

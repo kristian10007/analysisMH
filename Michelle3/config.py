@@ -2,7 +2,7 @@ import numpy as np
 import os.path
 
 #
-fileName_csv_preprocessed = 'data/preproceesed_data_Michelle.csv'''
+fileName_csv_preprocessed = 'data/preproceesed_data_Michelle.csv'
 fileName_final_cluser_indexes = 'data/final_cluser_indexes.npy'
 fileName_final_cluser_patient_id = 'data/final_cluser_patient_id.npy'
 

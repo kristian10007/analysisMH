@@ -1,0 +1,13 @@
+version: '2'
+services:
+    michelle:
+        restart: 'no'
+        build: docker
+        container_name: michelle
+        volumes:
+          - ./Michelle3:/data
+          - ./results/Michelle:/data/data
+          - ./results:/data/out
+        command: make ALL
+        working_dir: /data
+
