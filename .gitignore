@@ -6,3 +6,7 @@ __pycache__
 *.pdf
 *.swp
 .ipynb_checkpoints
+*.ok
+images
+data
+temp
