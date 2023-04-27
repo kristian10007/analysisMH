@@ -17,10 +17,13 @@ $(PreprocessedData): data/step1.md
 $(Indices): data/step3.ok
 
 data/%.pdf: data/%.md
+	pandoc -f markdown -t latex --toc $< -o $<.tex
 	pandoc -f markdown -t pdf --toc $< -o $@
 
-data/report.md: data/step1.md
+data/report.md: data/step1.md data/step2.md
 	cat data/step1.md > data/report.md
+	echo '' >> data/report.md
+	cat data/step2.md >> data/report.md
 
 
 report.sh:
@@ -40,7 +43,7 @@ data/step1.md: report.sh Tabelle_mit_Patientennummer_K.xlsx step1*.py $(LIB)
 
 
 # Step 2
-data/step2.ok: $(PreprocessedData) step2*.py $(LIB)
+data/step2.md: $(PreprocessedData) step2*.py $(LIB)
 	./report.sh 'Classification'
 	rm -rf $@ data/images/Classification
 	python3 step2_*.py > data/step2.log 2>&1

@@ -55,7 +55,7 @@ def safeFilename(name):
     specialChars = {'ä': 'ae', 'Ä': 'Ae', 'ö': 'oe', 'Ö': 'Oe', 'ü': 'ue', 'Ü': 'Ue', 'ß': 'ss' }
     newName = ""
     for c in name:
-        if c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-() _=0123456789,;.":
+        if c in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-()_=0123456789,;.":
             newName += c
         elif c in specialChars:
             newName += specialChars[c]

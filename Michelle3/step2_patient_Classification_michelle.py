@@ -45,6 +45,25 @@ from config import *
 from tools import *
 
 
+md = MD("data/step2.md")
+
+md.print("\\newpage")
+md.heading("Classification")
+
+global imageCount 
+imageCount = 0
+
+def saveImage(imageFile):
+    global imageCount 
+    plt.savefig(imageFile)
+    plt.close()
+    md.image(imageFile, 'Graphic')
+    if imageCount < 4:
+        imageCount += 1
+    else:
+        imageCount = 0
+        md.print("\\newpage")
+
 # In[ ]:
 
 
@@ -167,7 +186,7 @@ for c in data.columns:
 X=np.array(df)
 
 
-# ## Analysis for switch between TC and Cyc
+md.heading("Analysis for switch between TC and Cyc", 2)
 
 # In[ ]:
 
@@ -205,9 +224,7 @@ np.unique(y_TC_switch_discretize, return_counts=True)
 pca = PCA()
 Xt = pca.fit_transform(X)
 plot = plt.scatter(Xt[:,0], Xt[:,1], c=y_TC_switch_discretize, s=4)
-plt.savefig(imagesPath + "/pca_y_TC_switch_discretize.pdf")
-plt.close()
-
+saveImage(imagesPath + "/pca_y_TC_switch_discretize.pdf")
 
 # In[ ]:
 
@@ -218,7 +235,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y_TC_switch_discretize, t
 # In[ ]:
 
 
-X_train.shape
+print(X_train.shape)
 
 
 # In[ ]:
@@ -263,11 +280,11 @@ kf = KFold(n_splits=5, random_state=42, shuffle=True)
 # In[ ]:
 
 
-example_params = {
-    }
+example_params = { }
 
 
-# #### trying cross validation with gradient boosting
+md.print()
+md.print("Trying cross validation with gradient boosting")
 
 # In[ ]:
 
@@ -278,48 +295,32 @@ CV_scores_GB=score_model(GradientBoostingClassifier, example_params, cv=kf)
 # In[ ]:
 
 
-CV_scores_GB
+md.code(CV_scores_GB)
+md.code(CV_scores_GB.std())
 
 
-# In[ ]:
+md.print()
+md.print("We observe incosistent results across the five folds, thus model might be overfitting")
+md.print('Cross Validated geometric mean: ')
+md.code(CV_scores_GB.mean())
+
+md.heading("trying cross validation with k-Nearest Neighbours, a simpler model", 2)
+
+CV_scores_kNN = score_model(KNeighborsClassifier, example_params, cv=kf)
+
+md.code(CV_scores_kNN)
+md.code(CV_scores_kNN.std())
 
 
-CV_scores_GB.std()
+md.print("We observe more cosistent results across the five folds, thus kNN would be more reliable than GB")
+
+md.print()
+md.print('Cross Validated geometric mean:')
+md.code(CV_scores_kNN.mean())
 
 
-# We observe incosistent results across the five folds, thus model might be overfitting
-
-# print('Cross Validated geometric mean:',CV_scores_GB.mean())
-
-# #### trying cross validation with k-Nearest Neighbours, a simpler model
-
-# In[ ]:
-
-
-CV_scores_kNN=score_model(KNeighborsClassifier, example_params, cv=kf)
-
-
-# In[ ]:
-
-
-CV_scores_kNN
-
-
-# In[ ]:
-
-
-CV_scores_kNN.std()
-
-
-# We observe more cosistent results across the five folds, thus kNN would be more reliable than GB
-
-# In[ ]:
-
-
-print('Cross Validated geometric mean:',CV_scores_kNN.mean())
-
-
-# #### We therefore validate on the independent set with the kNN model
+md.print()
+md.print("We therefore validate on the independent set with the kNN model")
 
 # In[ ]:
 
@@ -351,8 +352,9 @@ y_pred_proba=y_pred_proba[:,1]
 # In[ ]:
 
 
-print(confusion_matrix(y_test, y_pred))
-print('G-Mean for classification:',geometric_mean_score(y_test, y_pred))
+md.code(confusion_matrix(y_test, y_pred))
+md.print('G-Mean for classification:')
+md.code(geometric_mean_score(y_test, y_pred))
 
 
 # In[ ]:
@@ -366,12 +368,14 @@ plt.title('Area under precision recall curve='+str(area*100)[:5]+'% for TC-Cyc s
 plt.xlabel('recall', fontsize=12) 
 plt.ylabel('precision', fontsize=12) 
 # axis labels
-plt.savefig(f"{imagesPath}/precision_recall_curve.pdf")
-plt.close()
+saveImage(f"{imagesPath}/precision_recall_curve.pdf")
 
 
-# Understand Partial Dependence Plots (PDPs) from the following video:
-# https://www.youtube.com/watch?v=uQQa3wQgG_s&ab_channel=ritvikmath
+
+md.print("\\newpage")
+md.print()
+md.print("Understand Partial Dependence Plots (PDPs) from the following video:")
+md.print("<https://www.youtube.com/watch?v=uQQa3wQgG_s&ab_channel=ritvikmath>")
 
 # In[ ]:
 
@@ -382,18 +386,23 @@ df_test=pd.DataFrame(data = X_test,
 
 # In[ ]:
 
-
+n = 0
 for var in df.columns:
     p=partial_dependence(model, df_test, [var])
     sns.lineplot(x=p['values'][0], y=p['average'][0]/max(abs(p['average'][0])), style=0, markers=True, legend=False)
     plt.ylim(-1.02,1.02)
     plt.ylabel("Partial dependence for feature "+var)
     plt.xlabel(var)
-    plt.savefig(f"{imagesPath}/pdp/{safeFilename(var)}.pdf")
-    plt.close()
+    imageFile = f"{imagesPath}/pdp/{safeFilename(var)}.pdf"
+    saveImage(imageFile)
+    n += 1
+    if n > 10:
+        md.print("\\newpage")
+        n = 0
 
 
-# ## Analysis for implementation of TC
+md.print("\\newpage")
+md.heading("Analysis for implementation of TC", 2)
 
 # In[ ]:
 
@@ -425,8 +434,8 @@ np.unique(y_Tacrolimus_discretize, return_counts=True)
 pca = PCA()
 Xt = pca.fit_transform(X)
 plot = plt.scatter(Xt[:,0], Xt[:,1], c=y_Tacrolimus_discretize, s=4)
-plt.savefig(imagesPath + "/pca_TC.pdf")
-plt.close()
+imageFile = imagesPath + "/pca_TC.pdf"
+saveImage(imageFile)
 
 
 # In[ ]:
@@ -444,19 +453,9 @@ cross_val_GB=cross_val_score(GradientBoostingClassifier(), X_train, y_train, cv=
 # In[ ]:
 
 
-cross_val_GB
-
-
-# In[ ]:
-
-
-cross_val_GB.mean()
-
-
-# In[ ]:
-
-
-cross_val_GB.std()
+md.code(cross_val_GB)
+md.code(cross_val_GB.mean())
+md.code(cross_val_GB.std())
 
 
 # In[ ]:
@@ -482,8 +481,9 @@ y_pred_proba=y_pred_proba[:,1]
 # In[ ]:
 
 
-print(confusion_matrix(y_test, y_pred))
-print('G-Mean for classification:',geometric_mean_score(y_test, y_pred))
+md.code(confusion_matrix(y_test, y_pred))
+md.print('G-Mean for classification:')
+md.code(geometric_mean_score(y_test, y_pred))
 
 
 # In[ ]:
@@ -497,8 +497,8 @@ plt.title('Area under ROC curve='+str(area*100)[:5]+'% for classification of pat
 plt.xlabel('false positive rate', fontsize=12) 
 plt.ylabel('true positive rate', fontsize=12) 
 # axis labels
-plt.savefig(imagesPath + "/roc_curve_TC.pdf")
-plt.close()
+imageFile = imagesPath + "/roc_curve_TC.pdf"
+saveImage(imageFile)
 
 
 # In[ ]:
@@ -517,15 +517,16 @@ ax7.bar(top_features,top_feature_importance_scores,color=sns.color_palette("Set3
 ax7.tick_params(axis='both', which='major', labelsize=10)
 plt.xlabel('Top features as per Gradiant Boosting Classifier for classification of patients under TC', fontsize=12)   
 plt.xticks(rotation=90)
-plt.savefig(imagesPath + "/Top features as per Gradiant Boosting Classifier for classification of patients under TC.pdf")
+imageFile = imagesPath + "/Top_features_as_per_Gradiant_Boosting_Classifier_for_classification_of_patients_under_TC.pdf"
+plt.savefig(imageFile)
 plt.close()
+md.image(imageFile, imageFile)
 
 
 # In[ ]:
 
 
-df_test=pd.DataFrame(data = X_test, 
-                  columns = df.columns)
+df_test=pd.DataFrame(data = X_test, columns = df.columns)
 
 
 # In[ ]:
@@ -538,11 +539,12 @@ for var in df.columns:
     plt.ylim(-1.02,1.02)
     plt.ylabel("Partial dependence for feature "+var)
     plt.xlabel(var)
-    plt.savefig(f"{imagesPath}/pdp_TC/{safeFilename(var)}.pdf")
-    plt.close()
+    saveImage(f"{imagesPath}/pdp_TC/{safeFilename(var)}.pdf")
 
 
-# ## Analysis for implementation of Cyc
+
+md.print("\\newpage")
+md.heading("Analysis for implementation of Cyc", 2)
 
 # In[ ]:
 
@@ -583,19 +585,9 @@ cross_val_GB=cross_val_score(GradientBoostingClassifier(), X_train, y_train, cv=
 # In[ ]:
 
 
-cross_val_GB
-
-
-# In[ ]:
-
-
-cross_val_GB.std()
-
-
-# In[ ]:
-
-
-cross_val_GB.mean()
+md.code(cross_val_GB)
+md.code(cross_val_GB.std())
+md.code(cross_val_GB.mean())
 
 
 # In[ ]:
@@ -621,8 +613,9 @@ y_pred_proba=y_pred_proba[:,1]
 # In[ ]:
 
 
-print(confusion_matrix(y_test, y_pred))
-print('G-Mean for classification:',geometric_mean_score(y_test, y_pred))
+md.code(confusion_matrix(y_test, y_pred))
+md.print('G-Mean for classification:')
+md.code(geometric_mean_score(y_test, y_pred))
 
 
 # In[ ]:
@@ -635,8 +628,7 @@ plt.plot(fpr, tpr)
 plt.title('Area under ROC curve='+str(area*100)[:5]+'% for classification of patients under Cyc')
 plt.xlabel('false positive rate', fontsize=12) 
 plt.ylabel('true positive rate', fontsize=12)
-plt.savefig(imagesPath + "/roc_Cyc.pdf")
-plt.close()
+saveImage(imagesPath + "/roc_Cyc.pdf")
 
 
 # In[ ]:
@@ -655,8 +647,8 @@ ax7.bar(top_features,top_feature_importance_scores,color=sns.color_palette("Set3
 ax7.tick_params(axis='both', which='major', labelsize=10)
 plt.xlabel('Top features as per Gradiant Boosting Classifier for classification of patients under Cyc', fontsize=12)   
 plt.xticks(rotation=90)
-plt.savefig(imagesPath + "/Top features as per Gradiant Boosting Classifier for classification of patients under Cyc.pdf")
-plt.close()
+saveImage(imagesPath + "/Top_features_as_per_Gradiant_Boosting_Classifier_for_classification_of_patients_under_Cyc.pdf")
+
 
 
 # In[ ]:
@@ -676,10 +668,11 @@ for var in df.columns:
     plt.ylim(-1.02,1.02)
     plt.ylabel("Partial dependence for feature "+var)
     plt.xlabel(var)
-    plt.savefig(f"{imagesPath}/pdp_Cyc/{safeFilename(var)}.pdf")
-    plt.close()
+    saveImage(f"{imagesPath}/pdp_Cyc/{safeFilename(var)}.pdf")
+    
 
 
+md.print("\\newpage")
 # In[ ]:
 
 
@@ -689,5 +682,5 @@ for var in df.columns:
 # In[ ]:
 
 
-
+md.close()
 
