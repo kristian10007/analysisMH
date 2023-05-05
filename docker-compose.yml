@@ -8,7 +8,6 @@ services:
           - ./Michelle3:/data
           - ./results/Michelle:/data/data
           - ./results:/data/out
-        command: make ALL
         working_dir: /data
 
     hilke:
@@ -19,6 +18,5 @@ services:
           - ./Hilke3:/data
           - ./results/Hilke:/data/data
           - ./results:/data/out
-        command: make ALL
         working_dir: /data
 
