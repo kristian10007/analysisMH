@@ -17,7 +17,6 @@ import seaborn as sns
 from sklearn.cluster import DBSCAN
 import random
 from scipy import ndarray
-from matplotlib import pyplot as plt
 from scipy.spatial import distance
 import umap.umap_ as umap
 from sklearn.cluster import KMeans
@@ -25,12 +24,11 @@ import pickle as pkl
 from scipy import stats
 from scipy.stats import ranksums
 from config import *
+from tools import *
 
+imagePath = "data/images/stratification"
+ensureDir(imagePath)
 
-# In[ ]:
-
-
-get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
 
 # In[ ]:
@@ -43,7 +41,10 @@ data = data.drop(["Patientennummer"],axis=1)
 # In[ ]:
 
 
+print()
+print("Columns:")
 data.columns
+updateMissingColumns(data)
 
 
 # In[ ]:
@@ -127,7 +128,7 @@ class MidpointNormalize(mpl.colors.Normalize):
 # In[ ]:
 
 
-def p_map(feature,var_type):
+def p_map(n, feature,var_type):
     heatmap, ax = plt.subplots()
     norm = MidpointNormalize(vmin=0, vmax=1, midpoint=0.5)
     im = ax.imshow(feature_p_val(feature,cluster_list,var_type), cmap='coolwarm', norm=norm)
@@ -141,31 +142,24 @@ def p_map(feature,var_type):
     cbar = heatmap.colorbar(im)
     cbar.ax.set_ylabel('p-value')
     plt.title(feature, fontsize=8)
-    print('\n')
-    plt.show()
-    
-    return
+    plt.savefig(f'{imagePath}/{n}_{safeFilename(feature)}.pdf', bbox_inches='tight')
+    plt.close()
 
 
 # In[ ]:
 
-
+n = 0
 for feature in cont_features:
-    p_map(feature,'cont')
-
-
-# In[ ]:
-
+    p_map(n, feature, 'cont')
+    n += 1
 
 for feature in ord_features:
-    p_map(feature,'ord')
-
-
-# In[ ]:
-
+    p_map(n, feature, 'ord')
+    n += 1
 
 for feature in nom_features:
-    p_map(feature,'nom')
+    p_map(n, feature, 'nom')
+    n += 1
 
 
 # In[ ]:

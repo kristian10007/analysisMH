@@ -198,6 +198,8 @@ plt.bar(values,counts,tick_label=values+1, )
 plt.xlabel('Clusters')
 plt.ylabel('Number of patients')
 plt.title('Distribution of clusters')
+plt.savefig(f'{imagePath}/Distribution_of_clusters.pdf', bbox_inches='tight')
+plt.close()
 
 
 # ## Summary statistics for clusters for every feature
@@ -242,24 +244,27 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
     ensureDir(f"{imagePath}/vizx")
     
     for featureNr, feature in enumerate(feature_list):
+        featureFileName = f"{imagePath}/vizx/{featureNr}_{safeFilename(feature)}"
+        featureLog = open(f"{featureFileName}.txt", "w")
         print('Feature name:', feature.upper())
-        print('\n')
+        print('Feature name:', feature.upper(), file=featureLog)
+        print('', file=featureLog)
     
         if len(main_data[feature].value_counts())<=vizlimit:
             cluster_counter=1
             for cluster in range(len(cluster_df_list)):
-                print('Cluster '+ str(cluster_counter)+ ' frequeny distribution')
+                print('Cluster '+ str(cluster_counter)+ ' frequeny distribution', file=featureLog)
                 if feature in list(rev_dict.keys()):
                     feat_keys=rev_dict[feature]
                     r=dict(zip(feat_keys.values(), feat_keys.keys()))
-                    print(cluster_df_list[cluster].replace({feature:r})[feature].value_counts())
+                    print(cluster_df_list[cluster].replace({feature:r})[feature].value_counts(), file=featureLog)
                 else:
-                    print(cluster_df_list[cluster][feature].value_counts())
+                    print(cluster_df_list[cluster][feature].value_counts(), file=featureLog)
                 cluster_counter=cluster_counter+1
-                print('\n')
+                print('\n', file=featureLog)
         
-        print('\n')
-        print('\n')
+        print('', file=featureLog)
+        print('', file=featureLog)
         
         col=sns.color_palette("Set2")
         
@@ -267,23 +272,14 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
         for cluster in range(len(cluster_df_list)):
             if len(main_data[feature].value_counts())<=vizlimit:
                 if feature in list(rev_dict.keys()):
-                    
-                    
                     y=np.array(cluster_df_list[cluster].replace({feature:r})[feature].value_counts())
                     x=np.array(cluster_df_list[cluster].replace({feature:r})[feature].value_counts().index)
                     cluster_bar.append([x,y])
-                    
-                   
                 else:
-                   
                     y=np.array(cluster_df_list[cluster][feature].value_counts().sort_index())
                     x=np.array(cluster_df_list[cluster][feature].value_counts().sort_index().index)
                     cluster_bar.append([x,y])
-            
                 
-                
-        cluster_bar=np.array(cluster_bar)
-        
         rows=1
         columns=6
         
@@ -294,13 +290,16 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
             c=0
             
             for j in range(columns):
-                ax[j].bar(cluster_bar[c,0],cluster_bar[c,1],color=col,width=.3)
+                ax[j].bar(cluster_bar[c][0],cluster_bar[c][1],color=col,width=.3)
                 ax[j].tick_params(axis='x', which='major', labelsize=8, rotation= 90)
                 ax[j].set_title('Cluster: '+str(c+1))
                 if c>len(cluster_df_list):
                     break
                 else:
                     c=c+1
+
+            plt.savefig(f'{featureFileName}_clusters.pdf', bbox_inches='tight')
+            plt.close()
             
         means=[]
         sds=[]
@@ -308,14 +307,14 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
         cluster_counter=1
         for cluster in range(len(cluster_df_list)):
             if feature in cont_features:
-                print('Cluster '+ str(cluster_counter)+ ' summary statistics')
-                print('\n')
+                print('Cluster '+ str(cluster_counter)+ ' summary statistics', file=featureLog)
+                print('\n', file=featureLog)
                 cm=cluster_df_list[cluster][feature].mean()
                 cs=cluster_df_list[cluster][feature].std()
-                print('feature mean:', cm)
-                print('feature standard deviation:', cs)
-                print('feature median:', cluster_df_list[cluster][feature].median())
-                print('\n')
+                print('feature mean:', cm, file=featureLog)
+                print('feature standard deviation:', cs, file=featureLog)
+                print('feature median:', cluster_df_list[cluster][feature].median(), file=featureLog)
+                print('\n', file=featureLog)
                 means.append(cm)
                 sds.append(cs)
                 cluster_labels.append('C'+str(cluster_counter))
@@ -328,19 +327,19 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
         
         
         if feature in cont_features:   
-            print('\n')  
-            print('Distribution of feature across clusters')
+            print('', file=featureLog)  
+            print('Distribution of feature across clusters', file=featureLog)
             fig, ax7 = plt.subplots()
             ax7.bar(cluster_labels,means,yerr=sds,color=sns.color_palette("Set3"))
             ax7.tick_params(axis='both', which='major', labelsize=10)
             plt.xlabel(feature, fontsize=15)
-            plt.savefig(f'{imagePath}/vizx/{featureNr}_{safeFilename(feature)}.pdf', bbox_inches='tight')
+            plt.savefig(f'{featureFileName}.pdf', bbox_inches='tight')
             plt.close()
         else:
-            print('\n')
+            print('', file=featureLog)
+            print('Feature distribution in UMAP embedding', file=featureLog)
             colors_set = ['lightcoral','cornflowerblue','orange','mediumorchid', 'lightseagreen','olive', 'chocolate','steelblue',"paleturquoise",  "lightgreen",  'burlywood','lightsteelblue']
             customPalette_set = sns.set_palette(sns.color_palette(colors_set))
-            print('Feature distribution in UMAP embedding')
             if feature in list(rev_dict.keys()):
                 umap_data[feature]=np.array(main_data.replace({feature:r})[feature])
             else:
@@ -351,11 +350,10 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
               legend=True,
               hue=feature, # color by cluster
               scatter_kws={"s": 20},palette=customPalette_set) # specify the point size
-            plt.savefig(f'{imagePath}/vizx/{featureNr}_{safeFilename(feature)}.pdf', bbox_inches='tight')
+            plt.savefig(f'{featureFileName}.pdf', bbox_inches='tight')
             plt.close()
         
-        print('\n')
-        print('\n')
+        featureLog.close()
         
 
 

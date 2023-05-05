@@ -35,12 +35,12 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
+from tools import *
+
+imagePath = "data/images/classification"
+ensureDir(imagePath)
 
 
-# In[ ]:
-
-
-get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
 
 # ## Load data
@@ -168,6 +168,8 @@ plt.xlabel('recall', fontsize=12)
 plt.ylabel('precision', fontsize=12) 
 plt.ylim(-0.05, 1.05)
 plt.xlim(-0.05, 1.05)
+plt.savefig(f'{imagePath}/Area under precision recall curve.pdf', bbox_inches='tight')
+plt.close()
 
 # axis labels
 
@@ -188,5 +190,6 @@ ax7.bar(top_features,top_feature_importance_scores,color=sns.color_palette("Set3
 ax7.tick_params(axis='both', which='major', labelsize=10)
 plt.xlabel('Top features as per Gradiant Boosting Classifier for TC-Cyc switch classification', fontsize=12)   
 plt.xticks(rotation=90)
-plt.show()
+plt.savefig(f'{imagePath}/Top features as per Gradiant Boosting Classifier for TC-Cyc switch classification.pdf', bbox_inches='tight')
+plt.close()
 
