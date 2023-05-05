@@ -48,7 +48,10 @@ for k in data["Patientennummer"].index:
     all_patient_ids[k] = data['Patientennummer'][k]
 
 all_patient_ids = np.array(all_patient_ids)
-all_patient_ids
+
+print()
+print("Patient IDs:")
+print(all_patient_ids)
 
 
 # In[ ]:
@@ -59,9 +62,11 @@ data = data.drop(["Patientennummer"],axis=1)
 
 # In[ ]:
 
+print()
+print("Columns:")
+print(data.columns)
 
-data.columns
-
+updateMissingColumns(data)
 
 # In[ ]:
 
@@ -179,7 +184,7 @@ sns.lmplot( x="UMAP_0", y="UMAP_1",
   legend=True,
   hue='Cluster', # color by cluster
   scatter_kws={"s": 10},palette="Set1") # specify the point size
-plt.savefig(f'{imagePath}/clusters_umap.png', bbox_inches='tight')
+plt.savefig(f'{imagePath}/clusters_umap.pdf', bbox_inches='tight')
 plt.close()
 
 
@@ -236,7 +241,7 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
     
     ensureDir(f"{imagePath}/vizx")
     
-    for fartureNr, feature in enumerate(feature_list):
+    for featureNr, feature in enumerate(feature_list):
         print('Feature name:', feature.upper())
         print('\n')
     
