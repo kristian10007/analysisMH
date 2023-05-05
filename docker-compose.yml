@@ -11,3 +11,14 @@ services:
         command: make ALL
         working_dir: /data
 
+    hilke:
+        restart: 'no'
+        build: docker
+        container_name: hilke
+        volumes:
+          - ./Hilke3:/data
+          - ./results/Hilke:/data/data
+          - ./results:/data/out
+        command: make ALL
+        working_dir: /data
+
