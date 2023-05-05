@@ -14,7 +14,7 @@ out/analysis_Michelle_%.zip: $(PreprocessedData) $(Indices) $(Report)
 
 $(PreprocessedData): data/step1.md
 
-$(Indices): data/step3.ok
+$(Indices): data/step3.md
 
 data/%.pdf: data/%.md
 	pandoc -f markdown -t latex --toc $< -o $<.tex
