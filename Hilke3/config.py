@@ -1,3 +1,27 @@
+global cont_features 
+global nom_features 
+global ord_features 
+
+
+def updateMissingColumns(data):
+    global cont_features 
+    global nom_features 
+    global ord_features
+
+    all_labeled_columns = cont_features + nom_features + ord_features
+
+    for x in all_labeled_columns:
+        if x not in data.columns:
+            print(f"Column not in dataset: '{x}'")
+            if x in cont_features:
+                cont_features.remove(x)
+
+            if x in nom_features:
+                nom_features.remove(x)
+
+            if x in ord_features:
+                ord_features.remove(x)
+
 cont_features = [ 'Dialysezeit in Tagen '
     , 'Alter bei Tx (Empfänger)'
     , 'BMI','Präformierte AK in %','OP Dauer in Minuten'
