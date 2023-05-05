@@ -14,16 +14,20 @@ out/analysis_Hilke_%.zip: $(PreprocessedData) $(Indices) $(Report)
 
 $(PreprocessedData): data/step1.md
 
-$(Indices): data/step3.ok
+$(Indices): data/step3.md
 
 data/%.pdf: data/%.md
 	pandoc -f markdown -t latex --toc $< -o $<.tex
 	pandoc -f markdown -t pdf --toc $< -o $@
 
-data/report.md: data/step1.md data/step2.md
+data/report.md: data/step1.md data/step2.md data/step3.md data/step4.md
 	cat data/step1.md > data/report.md
 	echo '' >> data/report.md
 	cat data/step2.md >> data/report.md
+	echo '' >> data/report.md
+	cat data/step3.md >> data/report.md
+	echo '' >> data/report.md
+	cat data/step4.md >> data/report.md
 
 
 report.sh:
@@ -36,7 +40,7 @@ report.sh:
 # Step 1
 data/step1.md: report.sh Doktorarbeit_Hilke_8.3.xlsx step1*.py $(LIB)
 	./report.sh 'Preprocessing data'
-	rm -f $@ $(PreprocessedData) data/rev_dict.json
+	rm -f $@ $(PreprocessedData) data/rev_dict.json data/images/preprocessing/*
 	test -d data || mkdir data
 	python3 step1_*.py > data/step1.log 2>&1
 	touch $@
@@ -51,15 +55,15 @@ data/step2.md: $(PreprocessedData) step2*.py $(LIB)
 
 
 # Step 3
-data/step3.ok: $(PreprocessedData) step3*.py $(LIB)
+data/step3.md: $(PreprocessedData) step3*.py $(LIB)
 	./report.sh 'Stratification'
-	rm -rf $@ data/images/Stratification data/*.npy
+	rm -rf $@ data/images/stratification data/*.npy
 	python3 step3_*.py > data/step3.log 2>&1
-	touch data/step3.ok
+	touch $@
 
 
 # Step 4
-data/step4.ok: $(PreprocessedData) $(Indices) step4*.py $(LIB)
+data/step4.md: $(PreprocessedData) $(Indices) step4*.py $(LIB)
 	./report.sh 'Hypothesis testing'
 	rm -rf $@ data/images/cluster_hypothesis_testing
 	python3 step4_*.py > data/step4.log 2>&1
