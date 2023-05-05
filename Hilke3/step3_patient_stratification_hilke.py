@@ -26,12 +26,12 @@ from sklearn.cluster import OPTICS
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import AgglomerativeClustering
 from config import *
+from tools import *
+
+imagePath = "data/images/stratification"
+ensureDir(imagePath)
 
 
-# In[ ]:
-
-
-get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
 
 
 # In[ ]:
@@ -179,8 +179,8 @@ sns.lmplot( x="UMAP_0", y="UMAP_1",
   legend=True,
   hue='Cluster', # color by cluster
   scatter_kws={"s": 10},palette="Set1") # specify the point size
-plt.show()
-#plt.savefig('clusters_umap.png', dpi=700, bbox_inches='tight')
+plt.savefig(f'{imagePath}/clusters_umap.png', bbox_inches='tight')
+plt.close()
 
 
 # - After we visualize the obtained clusters we check their cardinalities
@@ -230,13 +230,13 @@ data.columns
 
 
 def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
-    get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'svg'")
     vizlimit=15
     plt.rcParams["figure.figsize"] = (12,6)
     
     
+    ensureDir(f"{imagePath}/vizx")
     
-    for feature in feature_list:
+    for fartureNr, feature in enumerate(feature_list):
         print('Feature name:', feature.upper())
         print('\n')
     
@@ -321,23 +321,20 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
         sds=np.array(sds)
         cluster_labels=np.array(cluster_labels)
         
-        print('\n')  
         
-        print('Distribution of feature across clusters')
         if feature in cont_features:   
+            print('\n')  
+            print('Distribution of feature across clusters')
             fig, ax7 = plt.subplots()
             ax7.bar(cluster_labels,means,yerr=sds,color=sns.color_palette("Set3"))
             ax7.tick_params(axis='both', which='major', labelsize=10)
-            plt.xlabel(feature, fontsize=15)        
-            plt.show()
-        
-        print('\n')
-        print('\n')
-        
-        colors_set = ['lightcoral','cornflowerblue','orange','mediumorchid', 'lightseagreen','olive', 'chocolate','steelblue',"paleturquoise",  "lightgreen",  'burlywood','lightsteelblue']
-        customPalette_set = sns.set_palette(sns.color_palette(colors_set))
-        
-        if feature not in cont_features:
+            plt.xlabel(feature, fontsize=15)
+            plt.savefig(f'{imagePath}/vizx/{featureNr}_{safeFilename(feature)}.pdf', bbox_inches='tight')
+            plt.close()
+        else:
+            print('\n')
+            colors_set = ['lightcoral','cornflowerblue','orange','mediumorchid', 'lightseagreen','olive', 'chocolate','steelblue',"paleturquoise",  "lightgreen",  'burlywood','lightsteelblue']
+            customPalette_set = sns.set_palette(sns.color_palette(colors_set))
             print('Feature distribution in UMAP embedding')
             if feature in list(rev_dict.keys()):
                 umap_data[feature]=np.array(main_data.replace({feature:r})[feature])
@@ -349,8 +346,8 @@ def vizx(feature_list, cluster_df_list, main_data,umap_data,cont_features):
               legend=True,
               hue=feature, # color by cluster
               scatter_kws={"s": 20},palette=customPalette_set) # specify the point size
-            plt.show()
-            #plt.savefig('clusters_umap_fin.png', dpi=700, bbox_inches='tight')
+            plt.savefig(f'{imagePath}/vizx/{featureNr}_{safeFilename(feature)}.pdf', bbox_inches='tight')
+            plt.close()
         
         print('\n')
         print('\n')
@@ -376,6 +373,8 @@ vizx(feats_viz,cluster_df_list,data,result,cont_features)
 # In[ ]:
 
 
+print()
+print("# final_cluser_indexes: ")
 final_cluser_indexes=[]
 for i in range(len(cluster_df_list)):
     index_list=np.array((cluster_df_list[i].index))
@@ -383,22 +382,17 @@ for i in range(len(cluster_df_list)):
 final_cluser_indexes=np.array(final_cluser_indexes, dtype=object)
 
 
-# In[ ]:
-
-
 with open('final_cluser_indexes.npy','wb') as f:
     np.save(f,final_cluser_indexes)
 
 
-# In[ ]:
-
-
-np.load('final_cluser_indexes.npy',allow_pickle=True)
+print(np.load('final_cluser_indexes.npy',allow_pickle=True))
 
 
 # In[ ]:
 
-
+print()
+print("# final_cluser_patient_ids: ")
 final_cluser_patient_ids = []
 for cluster in cluster_df_list:
     index_list = np.array(cluster.index)
@@ -410,5 +404,5 @@ final_cluser_patient_ids = np.array(final_cluser_patient_ids, dtype=object)
 with open('final_cluser_patient_id.npy','wb') as f:
     np.save(f, final_cluser_patient_ids)
     
-np.load('final_cluser_patient_id.npy', allow_pickle=True)
+print(np.load('final_cluser_patient_id.npy', allow_pickle=True))
 
