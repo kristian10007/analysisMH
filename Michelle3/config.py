@@ -171,7 +171,7 @@ data_mapping = { c_Blutgruppe_Empfaenger: map_blutgruppe
                , c_Cross_match: map_pos_neg
                , c_erste_Ausfuhr_am: {"sofort": 2, 'verzögert':1, ' verzögert':1, 'keine':0, 'nie':0}
                , c_Rh_Spender: {"D": 1, 'd':0}
-               , c_Rh_Empfaenger: {"D": 1, 'd':0, 'B': 2}
+               , c_Rh_Empfaenger: {"D": 1, 'd':0}
                , c_Wundheilungsstoerung: {'nein': 0, 'ja': 1, "x": 1}
                }
 

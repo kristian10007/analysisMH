@@ -23,13 +23,6 @@ from scipy.stats import entropy
 from config import *
 
 
-# In[ ]:
-
-
-from IPython.core.interactiveshell import InteractiveShell
-
-InteractiveShell.ast_node_interactivity = "all"
-
 
 # In[ ]:
 
@@ -42,7 +35,7 @@ md.heading("Data preprocessing")
 # In[ ]:
 
 
-filename='Tabelle_mit_Patientennummer_K.xlsx'
+filename='Tabelle_mit_Patientennummer_K (1).xlsx'
 data=pd.read_excel(filename)
 
 
