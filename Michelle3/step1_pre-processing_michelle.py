@@ -35,7 +35,7 @@ md.heading("Data preprocessing")
 # In[ ]:
 
 
-filename='Tabelle_mit_Patientennummer_K (1).xlsx'
+filename='Tabelle_mit_Patientennummer_K2.xlsx'
 data=pd.read_excel(filename)
 
 
